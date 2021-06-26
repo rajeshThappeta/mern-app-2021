@@ -37,7 +37,7 @@ function Login(props) {
                 }
             })
             .catch(err => {
-                console.log(err)
+                console.log("err in login",err)
                 alert("something went wrong in login")
             })
 

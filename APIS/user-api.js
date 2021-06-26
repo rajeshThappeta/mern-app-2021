@@ -2,10 +2,11 @@
 const exp = require('express')
 const userApi = exp.Router();
 const expressErrorHandler = require("express-async-handler")
-const multerObj=require("./middlewares/addfile")
+const multerObj = require("./middlewares/addfile")
 const checkToken = require("./middlewares/verifyToken")
 const bcryptjs = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+require('dotenv').config()
 
 //body parsing middleware
 userApi.use(exp.json())
@@ -163,7 +164,7 @@ userApi.post("/login", expressErrorHandler(async (req, res, next) => {
         //if passwords are matched
         else {
             //create a token and send it as res 
-            let token = await jwt.sign({ username: credentials.username }, 'abcdef', { expiresIn: 10 })
+            let token = await jwt.sign({ username: credentials.username }, process.env.SECRET, { expiresIn: 10 })
 
             //remove password from user
             delete user.password;
@@ -179,6 +180,58 @@ userApi.post("/login", expressErrorHandler(async (req, res, next) => {
 
 
 
+
+//add to cart
+userApi.post("/addtocart", expressErrorHandler(async (req, res, next) => {
+
+    let userCartCollectionObject = req.app.get("userCartCollectionObject")
+
+    //get user cart obj
+    let userCartObj = req.body;
+
+
+    //find user in usercartcollection
+    let userInCart = await userCartCollectionObject.findOne({ username: userCartObj.username })
+
+    //if user not existed in acrt
+    if (userInCart === null) {
+
+        //new usercartObject
+        let products = [];
+        products.push(userCartObj.productObj)
+        let newUserCartObject = { username: userCartObj.username, products: products };
+
+        // console.log(newUserCartObject)
+        //insert
+        await userCartCollectionObject.insertOne(newUserCartObject)
+        res.send({ message: "Product added to cart" })
+    }
+    //if user already existed in cart
+    else {
+
+        userInCart.products.push(userCartObj.productObj)
+        //update
+        await userCartCollectionObject.updateOne({ username: userCartObj.username }, { $set: { ...userInCart } })
+        res.send({ message: "Product added to cart" })
+    }
+
+
+}))
+
+
+
+
+//get products
+userApi.get("/getproducts/:username", expressErrorHandler(async (req, res, next) => {
+
+    let userCartCollectionObject = req.app.get("userCartCollectionObject")
+
+    let un = req.params.username;
+    let cartObj = await userCartCollectionObject.findOne({ username: un })
+
+    res.send({ message: cartObj })
+
+}))
 
 
 

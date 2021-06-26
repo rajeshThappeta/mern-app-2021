@@ -48,8 +48,8 @@ function Register() {
 
 
     return (
-        <div>
-            <h1>register here</h1>
+       
+           
             <form className="w-50 mx-auto mt-5" onSubmit={handleSubmit(onFormSubmit)}>
                 <input type="text" className="form-control mb-3"  {...register("username")} placeholder="Username" />
                 <input type="password" className="form-control mb-3"  {...register("password")} placeholder="Password" />
@@ -59,8 +59,7 @@ function Register() {
 
                 <button className="btn btn-success">Register</button>
             </form>
-        </div>
-
+      
 
     )
 }
